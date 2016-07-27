@@ -17,14 +17,16 @@
   var r = Math.ceil(window.devicePixelRatio) || 1;
   var size = 16 * r;
   var defaults = {
-    width: 7,
-    height: 9,
-    font: 10 * r + 'px arial',
-    color: '#ffffff',
-    background: '#F03D25',
-    fallback: true,
+    width:       7,
+    height:      9,
+    font:        10 * r + 'px arial',
+    color:       '#ffffff',
+    background:  '#F03D25',
+    fallback:    true,
     crossOrigin: true,
-    abbreviate: true
+    abbreviate:  true,
+    shape:       "square",
+    rad:         null
   };
 
   var ua = (function () {
@@ -131,7 +133,7 @@
       context.drawImage(faviconImage, 0, 0, faviconImage.width, faviconImage.height, 0, 0, size, size);
 
       // draw bubble over the top
-      if ((label + '').length > 0) drawBubble(context, label, color);
+      if ((label + '').length > 0) drawBadge(context, label, color);
 
       // refresh tag in page
       refreshFavicon();
@@ -165,49 +167,75 @@
     }
   };
 
-  var drawBubble = function(context, label, color) {
 
+  var drawBadge = function(context, label, color) {
     // automatic abbreviation for long (>2 digits) numbers
     if (typeof label == 'number' && label > 99 && options.abbreviate) {
       label = abbreviateNumber(label);
     }
 
-    // bubble needs to be larger for double digits
-    var len = (label + '').length-1;
+    var len    = (label + '').length-1,
+        height = options.height * r,
+        width  = options.width * r + (6 * r * len);
 
-    var width = options.width * r + (6 * r * len),
-      height = options.height * r;
+    var dimensions = {
+      len:       len, // badge needs to be larger for double digits
+      width:     width,
+      height:    height,
+      top:       size - height,
+      left:      size - width - r,
+      bottom:    16 * r,
+      right:     16 * r,
+      cornerRad: 2 * r,
+      rad:       options.rad || Math.floor(width/2)
+    }
 
-    var top = size - height,
-            left = size - width - r,
-            bottom = 16 * r,
-            right = 16 * r,
-            radius = 2 * r;
-
-    // webkit seems to render fonts lighter than firefox
-    context.font = (browser.webkit ? 'bold ' : '') + options.font;
-    context.fillStyle = options.background;
+    context.font        = options.font;
+    context.fillStyle   = options.background;
     context.strokeStyle = options.background;
-    context.lineWidth = r;
+
+    if (options.shape === "disc") {
+      drawDisc(context, label, color, dimensions);
+    } else {
+      drawBubble(context, label, color, dimensions);
+    }
+  };
+
+  var drawDisc = function(context, label, color, dim) {
+    var cy = size - dim.rad, cx = size - dim.rad;
+
+    // Circle
+    context.beginPath();
+    context.arc(cx, cy, dim.rad, 0, Math.PI*2);
+    context.fill();
+
+    context.fillStyle    = options.color;
+    context.textAlign    = "center";
+    context.textBaseline = "middle";
+
+    context.fillText(label, cx, cy, dim.rad*2-4);
+  };
+
+  var drawBubble = function(context, label, color, dim) {
 
     // bubble
     context.beginPath();
-        context.moveTo(left + radius, top);
-    context.quadraticCurveTo(left, top, left, top + radius);
-    context.lineTo(left, bottom - radius);
-        context.quadraticCurveTo(left, bottom, left + radius, bottom);
-        context.lineTo(right - radius, bottom);
-        context.quadraticCurveTo(right, bottom, right, bottom - radius);
-        context.lineTo(right, top + radius);
-        context.quadraticCurveTo(right, top, right - radius, top);
-        context.closePath();
-        context.fill();
+    context.moveTo(dim.left + dim.cornerRad, dim.top);
+    context.quadraticCurveTo(dim.left, dim.top, dim.left, dim.top + dim.cornerRad);
+    context.lineTo(dim.left, dim.bottom - dim.cornerRad);
+    context.quadraticCurveTo(dim.left, dim.bottom, dim.left + dim.cornerRad, dim.bottom);
+    context.lineTo(dim.right - dim.cornerRad, dim.bottom);
+    context.quadraticCurveTo(dim.right, dim.bottom, dim.right, dim.bottom - dim.cornerRad);
+    context.lineTo(dim.right, top + dim.cornerRad);
+    context.quadraticCurveTo(dim.right, dim.top, dim.right - dim.cornerRad, dim.top);
+    context.closePath();
+    context.fill();
 
-    // bottom shadow
+    // Bottom shadow
     context.beginPath();
     context.strokeStyle = "rgba(0,0,0,0.3)";
-    context.moveTo(left + radius / 2.0, bottom);
-    context.lineTo(right - radius / 2.0, bottom);
+    context.moveTo(dim.left + dim.cornerRad / 2.0, dim.bottom);
+    context.lineTo(dim.right - dim.cornerRad / 2.0, dim.bottom);
     context.stroke();
 
     // label
