@@ -2,15 +2,15 @@
 	<head>
 		<link rel="icon" href="favicon.ico">
 		<title>Tinycon</title>
-		
-		<script src="../tinycon.js"></script>
+
+		<script src="../tinycon.min.js"></script>
 		<script>
 			(function(){
 				var count = 0;
+				Tinycon.setOptions({shape:"disc", rad: 12});
 				setInterval(function(){
 					++count;
 					Tinycon.setBubble(count);
-
 				}, 1000);
 			})();
 		</script>
