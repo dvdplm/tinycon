@@ -217,7 +217,6 @@
   };
 
   var drawBubble = function(context, label, color, dim) {
-
     // bubble
     context.beginPath();
     context.moveTo(dim.left + dim.cornerRad, dim.top);
@@ -310,12 +309,6 @@
 
   Tinycon.setOptions(defaults);
 
-  if(typeof define === 'function' && define.amd) {
-    define(Tinycon);
-  } else if (typeof module !== 'undefined') {
-    module.exports = Tinycon;
-  } else {
-    window.Tinycon = Tinycon;
-  }
+  window.Tinycon = Tinycon;
 
 })();
