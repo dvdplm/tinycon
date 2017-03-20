@@ -3,7 +3,6 @@
  * Tom Moor, http://tommoor.com
  * Copyright (c) 2015 Tom Moor
  * @license MIT Licensed
- * @version 0.6.4
  */
 
 (function(){
@@ -14,6 +13,7 @@
   var faviconImage = null;
   var canvas = null;
   var options = {};
+  // Chrome browsers with nonstandard zoom report fractional devicePixelRatio.
   var r = Math.ceil(window.devicePixelRatio) || 1;
   var size = 16 * r;
   var defaults = {
